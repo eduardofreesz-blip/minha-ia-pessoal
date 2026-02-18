@@ -1,6 +1,20 @@
 import subprocess
+from datetime import datetime
 
-print("🤖 IA Pessoal Iniciada")
+ARQUIVO_MEMORIA = "memoria.txt"
+
+def ler_memoria():
+    try:
+        with open(ARQUIVO_MEMORIA, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return ""
+
+def salvar_memoria(texto):
+    with open(ARQUIVO_MEMORIA, "a", encoding="utf-8") as f:
+        f.write(texto + "\n")
+
+print("🤖 IA Pessoal com Memória")
 print("Digite 'sair' para encerrar\n")
 
 while True:
@@ -10,13 +24,17 @@ while True:
         print("IA: Até mais 👋")
         break
 
+    memoria = ler_memoria()
+
     prompt = f"""
 Você é um assistente pessoal.
-Responda sempre em português do Brasil.
-Seja claro, educado e direto.
-Use linguagem simples, como WhatsApp.
+Responda em português do Brasil.
+Seja simples, direto e educado.
 
-Pergunta do usuário:
+MEMÓRIA ANTERIOR:
+{memoria}
+
+MENSAGEM ATUAL DO USUÁRIO:
 {usuario}
 """
 
@@ -27,4 +45,10 @@ Pergunta do usuário:
         capture_output=True
     )
 
-    print("IA:", resposta.stdout)
+    resposta_texto = resposta.stdout.strip()
+
+    print("IA:", resposta_texto)
+
+    # salva conversa na memória
+    salvar_memoria(f"[{datetime.now()}] Usuário: {usuario}")
+    salvar_memoria(f"[{datetime.now()}] IA: {resposta_texto}")
