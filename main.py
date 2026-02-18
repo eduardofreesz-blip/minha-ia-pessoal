@@ -1,20 +1,30 @@
 import subprocess
 
-print("🤖 IA Pessoal Local (Grátis)")
+print("🤖 IA Pessoal Iniciada")
 print("Digite 'sair' para encerrar\n")
 
 while True:
-    user = input("Você: ")
+    usuario = input("Você: ")
 
-    if user.lower() == "sair":
+    if usuario.lower() == "sair":
+        print("IA: Até mais 👋")
         break
 
-    prompt = f"Responda como assistente pessoal, simples e direto: {user}"
+    prompt = f"""
+Você é um assistente pessoal.
+Responda sempre em português do Brasil.
+Seja claro, educado e direto.
+Use linguagem simples, como WhatsApp.
 
-    result = subprocess.run(
-        ["ollama", "run", "llama3", prompt],
-        capture_output=True,
-        text=True
+Pergunta do usuário:
+{usuario}
+"""
+
+    resposta = subprocess.run(
+        ["ollama", "run", "llama3"],
+        input=prompt,
+        text=True,
+        capture_output=True
     )
 
-    print("IA:", result.stdout)
+    print("IA:", resposta.stdout)
