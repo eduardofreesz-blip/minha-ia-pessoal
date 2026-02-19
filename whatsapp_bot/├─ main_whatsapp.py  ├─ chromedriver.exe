@@ -1,0 +1,84 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import unicodedata
+
+# ========= CONFIG =========
+CONTATO = "IA_DO_DUDU"
+CHROME_DRIVER = "chromedriver.exe"
+
+# ========= FUNÇÕES =========
+def limpar_texto(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFKD', texto)
+        if ord(c) <= 0xFFFF
+    )
+
+def resposta_ia(msg):
+    msg = msg.lower()
+
+    if "meu nome é" in msg:
+        nome = msg.replace("meu nome é", "").strip().title()
+        memoria["nome"] = nome
+        return f"Prazer, {nome}! Vou lembrar do seu nome."
+
+    if "qual meu nome" in msg and "nome" in memoria:
+        return f"Seu nome é {memoria['nome']}."
+
+    if "oi" in msg or "olá" in msg:
+        return "Olá! Estou ativo e pronto para conversar."
+
+    if "1" == msg:
+        return "Opção 1 selecionada."
+
+    return "Entendi. Pode continuar."
+
+# ========= MEMÓRIA =========
+memoria = {}
+
+# ========= INICIAR DRIVER =========
+service = Service(CHROME_DRIVER)
+driver = webdriver.Chrome(service=service)
+driver.get("https://web.whatsapp.com")
+
+input("Escaneie o QR Code e pressione ENTER quando carregar totalmente...")
+
+# ========= ABRIR CONVERSA =========
+wait = WebDriverWait(driver, 60)
+contato = wait.until(
+    EC.presence_of_element_located((By.XPATH, f"//span[@title='{CONTATO}']"))
+)
+contato.click()
+
+print("BOT AUTOMATICO ATIVO")
+
+ultima_msg = ""
+
+# ========= LOOP =========
+while True:
+    try:
+        mensagens = driver.find_elements(By.CSS_SELECTOR, "span.selectable-text.copyable-text")
+        if not mensagens:
+            time.sleep(1)
+            continue
+
+        msg_atual = mensagens[-1].text.strip()
+
+        if msg_atual != ultima_msg:
+            ultima_msg = msg_atual
+            resposta = resposta_ia(msg_atual)
+            resposta = limpar_texto(resposta)
+
+            caixa = driver.find_element(By.XPATH, "//div[@contenteditable='true']")
+            caixa.send_keys(resposta)
+            caixa.send_keys(Keys.ENTER)
+
+        time.sleep(1)
+
+    except Exception as e:
+        print("Erro:", e)
+        time.sleep(2)
