@@ -1,8 +1,5 @@
-numpy
-pandas
-torch
-transformers
-tqdm
-scikit-learn
-matplotlib
+# Requirements for Ollama, Selenium, and WhatsApp automation
 
+ollama
+selenium
+whatsapp-web.js
